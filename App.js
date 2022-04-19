@@ -1,118 +1,70 @@
-import React, { useState, useRef,useEffect } from "react";
-import { Button } from 'react-native'
-import {Alert, Modal, StyleSheet, Text, Pressable, View, TextInput, TimeInput, TouchableOpacity, FlatList, Image } from "react-native";
-import DatePicker from 'react-native-date-picker'
-import moment from "moment";
-const DATA = [];
+
+import { StyleSheet, Text, View, TouchableOpacity, Modal, TextInput, StatusBar, Keyboard } from 'react-native'
+import React, { useState } from 'react'
+import Task from './Components/Task';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 const App = () => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [date, setDate] = useState(new Date());
-  const [open, setOpen] = useState(false);
-  const [date1, setDate1] = useState(new Date());
-  const [open1, setOpen1] = useState(false);
-  const [title, settitle] = useState("");
-  const [description, setdescription] = useState("");
-  const [getA, setA] = useState(false)
-  const [data, setData] = React.useState(DATA); 
-  const removeItem = (title) => {
-    let arr = data.filter(function(item) {
-      return item.title !== title
-    })
-    setData(arr);
-  };
-  const renderItem = ({ item }) => (
-    <View style={{flex:1}}>
-    <View
-      style={{
-        flexDirection: 'row',
-        height: 50,
-        borderWidth: 1
-      }}>
-      <Text style={{ marginLeft: 25, fontSize: 10, alignSelf: 'center' }}>{item.title}</Text>
-      <Text style={{ marginLeft: 25, fontSize: 10, alignSelf: 'center' }}>{moment(item.date).format('DD/MM/YYYY, h:mm:ss a')}</Text>
-      <Text style={{ marginLeft: 25, fontSize: 10, alignSelf: 'center' }}>{moment(item.date1).format('DD/MM/YYYY, h:mm:ss a')}</Text>
-      <TouchableOpacity style={{ borderWidth: 1, height: 20, width: 20, borderRadius: 20, justifyContent: 'flex-end', alignItems: 'center', marginTop: 17, marginLeft: 20 }}
-        onPress={() => {
-          setA(true)
-        }}
-      >
-        {getA ?
-          <Image style={{ width: 20, height: 20,position:'absolute' }} resizeMode="contain" source={require('./image/tick.jpg')}></Image>
-        : <Text></Text>}
-      </TouchableOpacity>
-    </View>
-    </View>
-    
-  );
+
+  const [modalOpen, setModal] = useState(false);
+  const [title, settitle] = useState();
+  const [description, setdescription] = useState();
+  const [items, setItems] = useState([]);
+  const handleAddtask = () => {
+    Keyboard.dismiss();
+    setItems([...items, title])
+    settitle(null);
+    setdescription(null);
+  }
+
+  const completeTask = (index) => {
+    let itemsCopy = [...items];
+    itemsCopy.splice(index, 1);
+    setItems(itemsCopy)
+  }
+
 
   return (
-    <View style={styles.centeredView}>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-      >
-        <View style={styles.view}>
-          <View style={styles.modalView}>
-            <Text style={styles.intputText}>
-              Popup
-            </Text>
+    <View style={styles.container} >
+      <Modal transparent={true} visible={modalOpen} animationType='fade'>
+        <View style={{ backgroundColor: '#000000aa', flex: 1, }}>
+          <View style={{ backgroundColor: 'white', height: 200, width: 300, margin: 40, padding: 10, borderRadius: 10, flex: 1, }}>
+            {/* header for add-new-task popup */}
+            <View style={styles.HeaderPopup} >
+              <TouchableOpacity style={{ justifyContent: 'flex-end', alignItems: 'flex-start' }} onPress={() => setModal(false)} >
+                <View style={styles.addWrapper}>
+                  <Text style={styles.addText}>X</Text>
+                </View>
+              </TouchableOpacity>
+              <Text style={styles.TitlePopup}>Add new task</Text>
+            </View>
+
+            {/* Input details of a task */}
             <TextInput
-              style={styles.input}
-              placeholder="title"
-              onChangeText={settitle}
+              style={styles.inputTitle}
+              placeholder="Title"
+              onChangeText={text1 => settitle(text1)}
               value={title}
             >
             </TextInput>
             <TextInput
-              style={styles.input1}
-              placeholder="description"
-              onChangeText={setdescription}
+              style={styles.inputDescript}
+              placeholder="Description"
+              onChangeText={text2 => setdescription(text2)}
               value={description}>
             </TextInput>
-            <View style={{ flexDirection: 'row', marginTop: 30, justifyContent: 'space-around', width: 400 }}>
-              <Button style={{ margin: 20 }} title="Start" onPress={() => setOpen(true)} />
-              <DatePicker
-                modal
-                open={open}
-                date={date}
-                onConfirm={(date) => {
-                  setOpen(false)
-                  setDate(date)
-                }}
-                onCancel={() => {
-                  setOpen(false)
-                }}
-              />
-              <Button style={{ margin: 20 }} title="End" onPress={() => setOpen1(true)} />
-              <DatePicker
-                modal
-                open={open1}
-                date={date1}
-                onConfirm={(date1) => {
-                  setOpen1(false)
-                  setDate1(date1)
-                }}
-                onCancel={() => {
-                  setOpen1(false)
-                }}
-              />
-            </View>
-            <View style={{ flex: 1, marginLeft: 200 }}>
-              <View style={{ borderWidth: 1, margin: 20, width: 100, height: 50, alignItems: 'center', justifyContent: 'center', borderRadius: 30, backgroundColor: '#00FFFF' }}>
+
+            {/* Footer for add-new-task popup */}
+            <View style={styles.footerPopup}>
+              <View style={styles.SaveWrapper}>
                 <TouchableOpacity
                   onPress={() => {
-                    DATA.push({ title: title, description: description, date: date, date1: date1 })
-                    settitle("");
-                    setdescription("");
-                    setDate(new Date());
-                    setDate1(new Date());
-                    setModalVisible(!modalVisible)
+                    handleAddtask();
+                    setModal(!modalOpen)
                   }}
                 >
-                  <Text style={{ color: 'black', fontSize: 20, alignItems: 'center', justifyContent: 'center' }}>
-                    save
+                  <Text style={styles.SaveText}>
+                    Save
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -120,80 +72,160 @@ const App = () => {
           </View>
         </View>
       </Modal>
-      <View style={{ borderWidth: 1 }}>
-        <FlatList
-          data={DATA}
-          renderItem={renderItem}
-          keyExtractor={item => item.title}>
-        </FlatList>
-      </View>
-      <View style={{ flex: 1, height: '100%', width: '100%', justifyContent: 'flex-end', marginBottom: 30, marginLeft: 280 }}>
-        <View style={{ alignItems: 'center', justifyContent: 'center', borderWidth: 1, width: 100, height: 50, borderRadius: 30 }}>
-          <TouchableOpacity
-            onPress={() => setModalVisible(true)}>
-            <Text style={{ color: 'black', fontSize: 20, fontWeight: 'bold' }}>add</Text>
-          </TouchableOpacity>
+
+      <View style={styles.tasks}>
+        <Text style={styles.sectionTitle}>To-do list</Text>
+        <View style={styles.items}>
+
+          {
+            items.map((item, index) => {
+              return (
+                <TouchableOpacity key={index} onPress={() => completeTask(index)} >
+                  <Task text2 = {item} 
+                          />
+                </TouchableOpacity>
+              )
+            })
+          }
+          {/* <Task text={'Task 1'} />
+          <Task text={'Task 2'} /> */}
         </View>
       </View>
+
+      <View style={styles.buttonWrapper}>
+        <TouchableOpacity onPress={() => setModal(true)} >
+          <View style={styles.addWrapper}>
+            <Text style={styles.addText}>Add</Text>
+          </View>
+        </TouchableOpacity>
+
+      </View>
+
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor='#96D9FF'
+      />
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
-  time: {
+  container: {
+    flex: 1,
+    backgroundColor: '#55BCF6',
+
+  },
+  tasks: {
+    paddingTop: 80,
+    paddingHorizontal: 20,
+
+  },
+  sectionTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: 'white'
+  },
+  items: {
+    marginTop: 30,
+  },
+
+  addWrapper: {
+    width: 60,
+    height: 60,
+    backgroundColor: 'white',
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 3
+    },
+    shadowRadius: 5,
+    shadowOpacity: 1.0
+
+
+  },
+  addText: {
+    fontSize: 20,
+    color: '#55BCF6'
+  },
+
+  buttonWrapper: {
+    position: 'absolute',
+    bottom: 60,
+    width: '90%',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center'
+  },
+
+
+  inputTitle: {
     height: 50,
-    width: 300,
+    width: 250,
     borderWidth: 1,
     padding: 10,
-    fontSize: 20,
+    fontSize: 15,
+    borderRadius: 20,
+    borderColor: '#C0C0C0',
+    marginTop: 50,
+    marginLeft: 17,
+
   },
-  intputText: {
-    margin: 30,
-    color: 'black',
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  input: {
-    height: 50,
-    width: 300,
-    borderWidth: 1,
-    padding: 10,
-    fontSize: 20,
-  },
-  input1: {
+  inputDescript: {
     marginTop: 30,
     height: 100,
-    width: 300,
+    width: 250,
     borderWidth: 1,
     padding: 10,
-    fontSize: 20,
-  },
-  centeredView: {
-    flex: 1,
-    marginTop: 100
-  },
-  view: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalView: {
-    alignItems: 'center',
-    backgroundColor: "white",
-    width: 400,
-    height: 500,
-  },
-  button: {
+    fontSize: 15,
     borderRadius: 20,
-    padding: 10,
-    elevation: 2
+    borderColor: '#C0C0C0',
+    marginLeft: 17,
   },
-  buttonOpen: {
-    backgroundColor: "#F194FF",
+
+  TitlePopup: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#55BCF6',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  buttonClose: {
-    backgroundColor: "#2196F3",
+
+  HeaderPopup: {
+    position: 'absolute',
+    Top: 50,
+    width: '80%',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center'
   },
-});
+
+  SaveWrapper: {
+    width: 80,
+    height: 40,
+    backgroundColor: '#55BCF6',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  SaveText: {
+    fontSize: 20,
+    color: 'white'
+  },
+
+  footerPopup: {
+    position: 'absolute',
+    bottom: 20,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center'
+  }
+
+})
+
 
 export default App;
